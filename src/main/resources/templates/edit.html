@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>メモの編集</title>
+</head>
+<body>
+<h1>メモの編集</h1>
+
+<form th:action="@{/update/{id}(id=${memo.id})}" method="post">
+    <!-- th:value="${memo.content}" に変更 -->
+    <input type="text" name="content" th:value="${memo.content}" size="40">
+    <button type="submit">更新</button>
+</form>
+
+<p><a th:href="@{/}">キャンセルして戻る</a></p>
+</body>
+</html>

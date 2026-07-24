@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS MEMO - Ultimate Cyber Edition</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Vanilla-Tilt.js (3Dチルト効果用ライブラリ) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.75);
+            --neon-cyan: #06b6d4;
+            --neon-purple: #8b5cf6;
+            --neon-pink: #ec4899;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', 'Orbitron', sans-serif;
+            background-color: var(--bg-color);
+            background-image:
+                    radial-gradient(circle at 10% 20%, rgba(6, 182, 212, 0.15) 0%, transparent 40%),
+                    radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 40%);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding-bottom: 60px;
+            overflow-x: hidden;
+        }
+
+        /* マウス軌跡のネオンパーティクル */
+        .cursor-particle {
+            position: fixed;
+            pointer-events: none;
+            width: 6px;
+            height: 6px;
+            background-color: var(--neon-cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-purple);
+            animation: particleFade 0.6s linear forwards;
+            z-index: 9999;
+        }
+
+        @keyframes particleFade {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        .app-container {
+            max-width: 850px;
+            margin-top: 50px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* 3. グリッチ・エフェクト付きタイトル */
+        h1.app-title {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            letter-spacing: 3px;
+            background: linear-gradient(45deg, var(--neon-cyan), var(--neon-purple), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(6, 182, 212, 0.3);
+            margin-bottom: 1.5rem;
+            position: relative;
+            animation: glitchMain 4s infinite;
+        }
+
+        @keyframes glitchMain {
+            0%, 90%, 100% { transform: translate(0); }
+            92% { transform: translate(-2px, 2px); filter: hue-rotate(90deg); }
+            94% { transform: translate(2px, -2px); filter: hue-rotate(-90deg); }
+            96% { transform: translate(0); }
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transform-style: preserve-3d;
+            transform: perspective(1000px);
+        }
+
+        .input-card {
+            padding: 25px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .input-card.pulsing {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 30px rgba(6, 182, 212, 0.6);
+        }
+
+        .form-control {
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-main);
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        .form-control:focus {
+            background-color: rgba(15, 23, 42, 0.9);
+            border-color: var(--neon-cyan);
+            color: var(--text-main);
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn-neon-save {
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            border: none;
+            border-radius: 12px;
+            padding: 12px 25px;
+            color: white;
+            font-weight: 700;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
+        }
+
+        .btn-neon-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(6, 182, 212, 0.6);
+            background: linear-gradient(135deg, #0891b2, #7c3aed);
+            color: white;
+        }
+
+        .section-header {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+
+        /* 3Dチルトが適用されるカード */
+        .memo-item-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-left: 4px solid var(--neon-purple);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            animation: fadeIn 0.4s ease-out;
+            transform-style: preserve-3d;
+            transform: perspective(1000px);
+            transition: border-color 0.3s ease, border-left-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .memo-item-card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            border-left-color: var(--neon-cyan);
+            box-shadow: 0 15px 35px -10px rgba(6, 182, 212, 0.4);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .memo-text {
+            color: var(--text-main);
+            font-size: 1.05rem;
+            word-break: break-all;
+        }
+
+        .cyber-btn {
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-cyber-edit {
+            background-color: rgba(6, 182, 212, 0.15);
+            color: var(--neon-cyan);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+        .btn-cyber-edit:hover {
+            background-color: var(--neon-cyan);
+            color: #0f172a;
+            box-shadow: 0 0 12px rgba(6, 182, 212, 0.5);
+        }
+
+        .btn-cyber-delete {
+            background-color: rgba(236, 72, 153, 0.15);
+            color: var(--neon-pink);
+            border: 1px solid rgba(236, 72, 153, 0.3);
+        }
+        .btn-cyber-delete:hover {
+            background-color: var(--neon-pink);
+            color: white;
+            box-shadow: 0 0 12px rgba(236, 72, 153, 0.5);
+        }
+
+        .custom-badge {
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .empty-alert {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+            color: var(--text-muted);
+            border-radius: 12px;
+        }
+
+        ul.reset-list {
+            list-style: none;
+            padding-left: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container app-container">
+
+    <!-- ヘッダー (グリッチ演出) -->
+    <div class="text-center">
+        <h1 class="app-title display-5">
+            <i class="bi bi-cpu-fill"></i> NEXUS MEMO
+        </h1>
+    </div>
+
+    <!-- 入力フォームカード（3Dチルト対象） -->
+    <div class="glass-card input-card mb-4" id="inputCard" data-tilt data-tilt-max="5" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.1">
+        <form id="memoForm" class="row g-3 align-items-center">
+            <div class="col-12 col-md-9">
+                <input type="text" id="memoContentInput" class="form-control" placeholder="データストリームを入力..." required autocomplete="off">
+            </div>
+            <div class="col-12 col-md-3">
+                <button type="submit" class="btn btn-neon-save w-100">
+                    <i class="bi bi-database-add"></i> 記録する
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- リアルタイム検索フィルター -->
+    <div class="mb-4">
+        <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="🔍 アーカイブからリアルタイム検索...">
+    </div>
+
+    <!-- メモ一覧セクション -->
+    <div>
+        <div class="d-flex justify-content-between align-items-center section-header">
+            <span><i class="bi bi-stack"></i> アーカイブ一覧</span>
+            <span class="custom-badge" id="itemCountBadge">0 ITEMS</span>
+        </div>
+
+        <!-- メモ一覧を描画するコンテナ -->
+        <div id="emptyAlert" class="alert empty-alert text-center py-4 d-none">
+            <i class="bi bi-exclamation-triangle"></i> 記録されたデータはありません。
+        </div>
+
+        <ul class="reset-list" id="memoListContainer">
+            <!-- JSで動的にリストが挿入されます -->
+        </ul>
+    </div>
+
+</div>
+
+<!-- JavaScript による全部のせ制御 ＋ 演出 -->
+<script>
+    const API_URL = '/api/memos';
+
+    // 4. マウス軌跡のネオンパーティクル生成処理
+    let lastParticleTime = 0;
+    document.addEventListener('mousemove', (e) => {
+        const now = Date.now();
+        if (now - lastParticleTime > 40) { // 描画頻度を調整
+            lastParticleTime = now;
+            const particle = document.createElement('div');
+            particle.classList.add('cursor-particle');
+            particle.style.left = `${e.clientX}px`;
+            particle.style.top = `${e.clientY}px`;
+            document.body.appendChild(particle);
+
+            setTimeout(() => {
+                particle.remove();
+            }, 600);
+        }
+    });
+
+    // 1. ページ読み込み時にメモ一覧を取得して描画
+    document.addEventListener('DOMContentLoaded', fetchMemos);
+
+    async function fetchMemos() {
+        try {
+            const response = await fetch(API_URL);
+            const memos = await response.json();
+            renderMemos(memos);
+        } catch (error) {
+            console.error('データ取得エラー:', error);
+        }
+    }
+
+    // メモ一覧を描画する関数 ＋ 3Dチルトの適用
+    function renderMemos(memos) {
+        const container = document.getElementById('memoListContainer');
+        const emptyAlert = document.getElementById('emptyAlert');
+        const badge = document.getElementById('itemCountBadge');
+
+        container.innerHTML = '';
+        badge.textContent = memos.length + ' ITEMS';
+
+        if (memos.length === 0) {
+            emptyAlert.classList.remove('d-none');
+            return;
+        } else {
+            emptyAlert.classList.add('d-none');
+        }
+
+        memos.forEach(memo => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                    <div class="memo-item-card p-3 d-flex justify-content-between align-items-center"
+                         data-content="${memo.content}"
+                         data-tilt data-tilt-max="4" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.05">
+                        <span class="memo-text">${escapeHtml(memo.content)}</span>
+                        <div class="d-flex gap-2">
+                            <a href="/edit/${memo.id}" class="cyber-btn btn-cyber-edit">
+                                <i class="bi bi-terminal"></i> 編集
+                            </a>
+                            <button onclick="deleteMemo(${memo.id})" class="cyber-btn btn-cyber-delete">
+                                <i class="bi bi-trash3"></i> 削除
+                            </button>
+                        </div>
+                    </div>
+                `;
+            container.appendChild(li);
+        });
+
+        // 💥 新しく生成されたカードも含めて、Vanilla-Tilt.jsを適用させる
+        VanillaTilt.init(document.querySelectorAll(".memo-item-card"));
+    }
+
+    // 2. 非同期でメモを追加する（リロードなし ＆ パーティクル爆発）
+    const memoForm = document.getElementById('memoForm');
+    memoForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const input = document.getElementById('memoContentInput');
+        const content = input.value.trim();
+        if (!content) return;
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: content })
+            });
+
+            if (response.ok) {
+                input.value = '';
+                document.getElementById('inputCard').classList.remove('pulsing');
+                fetchMemos();
+
+                confetti({
+                    particleCount: 100,
+                    spread: 80,
+                    origin: { y: 0.6 },
+                    colors: ['#06b6d4', '#8b5cf6', '#ec4899']
+                });
+            }
+        } catch (error) {
+            console.error('保存エラー:', error);
+        }
+    });
+
+    // 3. 非同期でメモを削除する
+    async function deleteMemo(id) {
+        if (!confirm('このデータを削除しますか？')) return;
+
+        try {
+            const response = await fetch(`${API_URL}/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                fetchMemos();
+            }
+        } catch (error) {
+            console.error('削除エラー:', error);
+        }
+    }
+
+    // 入力中のパルスアニメーション
+    const inputField = document.getElementById('memoContentInput');
+    const inputCard = document.getElementById('inputCard');
+
+    inputField.addEventListener('input', () => {
+        if (inputField.value.length > 0) {
+            inputCard.classList.add('pulsing');
+        } else {
+            inputCard.classList.remove('pulsing');
+        }
+    });
+
+    // リアルタイム・インクリメンタルサーチ
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', (e) => {
+        const keyword = e.target.value.toLowerCase();
+        const cards = document.querySelectorAll('.memo-item-card');
+
+        cards.forEach(card => {
+            const text = card.getAttribute('data-content').toLowerCase();
+            if (text.includes(keyword)) {
+                card.parentElement.style.display = '';
+            } else {
+                card.parentElement.style.display = 'none';
+            }
+        });
+    });
+
+    function escapeHtml(str) {
+        return str.replace(/[&<>'"]/g,
+            tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+        );
+    }
+</script>
+</body>
+</html>
